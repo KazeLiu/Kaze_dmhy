@@ -1,14 +1,14 @@
 <template>
-  <page-home></page-home>
+  <home></home>
 </template>
 
 <script>
-import pageHome from './page'
+import Home from './page/searchBangumi'
 
 export default {
   name: 'App',
   components: {
-    pageHome
+    Home
   }
 }
 </script>

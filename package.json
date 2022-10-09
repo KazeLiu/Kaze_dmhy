@@ -13,9 +13,14 @@
   },
   "main": "background.js",
   "dependencies": {
+    "axios": "^1.1.2",
     "core-js": "^3.8.3",
+    "electron-win-state": "^1.1.22",
     "element-plus": "^2.2.17",
-    "vue": "^3.2.13"
+    "stream": "^0.0.2",
+    "timers": "^0.1.1",
+    "vue": "^3.2.13",
+    "xml2js": "^0.4.23"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
