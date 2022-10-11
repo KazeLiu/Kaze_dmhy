@@ -1,0 +1,151 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+.color-fff {
+  color: #ffffff!important;
+}
+
+.color-yellow {
+  color: #FEBB52;
+}
+
+.color-red {
+  color: #FD794F;
+}
+
+.color-blue {
+  color: #33A9F2
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.user-select-none{
+  user-select: none;
+}
+
+.transition-all-halfS{
+  transition: all 0.5s ease;
+}
+
+.ta-r {
+  text-align: right;
+}
+
+.ta-l {
+  text-align: left;
+}
+
+.ta-c {
+  text-align: center;
+}
+
+.flex {
+  display: flex !important;
+}
+
+.flex1 {
+  flex: 1;
+}
+
+.flex2 {
+  flex: 2;
+}
+
+.flex3 {
+  flex: 3;
+}
+
+.flex4 {
+  flex: 4;
+}
+
+.flex5 {
+  flex: 5;
+}
+
+.flex6 {
+  flex: 6;
+}
+
+.flex7 {
+  flex: 7;
+}
+
+.flex8 {
+  flex: 8;
+}
+
+.flex9 {
+  flex: 9;
+}
+
+.flex10 {
+  flex: 10;
+}
+
+
+.flex-column {
+  flex-direction: column;
+}
+
+.flex-row {
+  flex-direction: row;
+}
+
+.flex-between-center {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.flex-around-center {
+  justify-content: space-around;
+  align-items: center;
+}
+
+.flex-evenly-center {
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+.flex-start-center {
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.flex-end-center {
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.flex-center-center {
+  justify-content: center;
+  align-items: center;
+}
+
+.flex-align-start {
+  align-items: flex-start;
+}
+
+.flex-align-end {
+  align-items: flex-end;
+}
+
+.flex-align-center {
+  align-items: center;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.relative {
+  position: relative;
+}
+
+.absolute {
+  position: absolute;
+}

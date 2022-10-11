@@ -1,41 +1,72 @@
 'use strict'
 
-import {app, protocol, BrowserWindow} from 'electron'
+import {app, protocol, BrowserWindow, ipcMain} from 'electron'
+import {getWindow, windowList} from '@/assets/js/handleWindow'
 
-const Winstate = require('electron-win-state').default
+// const Store = require('electron-store');
+// const store = new Store();
+// store.set('unicorn', '🦄');
+// console.log(store.get('unicorn'));
+
+
+const WinState = require('electron-win-state').default
+
 const path = require('path')
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
+
 // 必须在应用程序准备好之前注册方案
-protocol.registerSchemesAsPrivileged([
-    {scheme: 'app', privileges: {secure: true, standard: true}}
-])
+protocol.registerSchemesAsPrivileged([{scheme: 'app', privileges: {secure: true, standard: true}}])
 
 
 async function createWindow() {
-    const winState = new Winstate({
-        defaultWidth: 600,
-        defaultHeight: 600
+
+    // 主页面窗口状态
+    const homeState = new WinState({
+        defaultWidth: 1100, defaultHeight: 800
     });
 
-    // Create the browser window.
+    // 主窗口内容
     const home = new BrowserWindow({
-        ...winState.winOptions,
-        webPreferences: {
-            preload: path.resolve(__dirname, 'preload.js'),
-            webSecurity: false,
-            // 使用 pluginOptions.nodeIntegration，不要管它
-            // 查看 nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration 了解更多信息
-            nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
-            contextIsolation: !process.env.ELECTRON_NODE_INTEGRATION
+        ...homeState.winOptions, webPreferences: {
+            preload: path.resolve(__dirname, 'preload.js'), webSecurity: false,
         }
     })
 
+    // 主窗口访问的vue地址
     await home.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
+
+    // 打开主窗口控制台
     home.webContents.openDevTools()
 
-    winState.manage(home)
+    // 将状态设置到主窗口
+    homeState.manage(home)
+    // 设置弹窗
+    ipcMain.on('newWindow', function (e, args) {
+        let newWin = new BrowserWindow({
+            width: args.width || 900,
+            height: args.height || 600,
+            minWidth: 500,
+            minHeight: 500,
+            fullscreen: false, //是否全屏显示
+            title: args.name,
+            show: false,
+            webPreferences: {
+                preload: path.resolve(__dirname, 'preload.js'),
+                webSecurity: false,
+            }
+        })
+        newWin.loadURL(process.env.WEBPACK_DEV_SERVER_URL + args.router)  // 此处写 你要打开的路由地址
+        newWin.on('close', () => {
+            newWin = null
+        })
+        newWin.on('ready-to-show', () => {
+            newWin.show();
+        })
+        newWin.webContents.openDevTools()
+    })
+
 }
 
 // 关闭所有窗口后退出
@@ -73,3 +104,4 @@ if (isDevelopment) {
     }
 }
 
+// 获取窗口

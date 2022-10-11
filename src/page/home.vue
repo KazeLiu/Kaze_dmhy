@@ -1,8 +1,7 @@
 <template>
   <div>
     <div>订阅番剧</div>
-    {{ list }}
-    <el-button>打开搜索</el-button>
+    <el-button @click="func.openSearch">打开搜索</el-button>
   </div>
 </template>
 
@@ -15,12 +14,10 @@ onMounted(() => {
 })
 const func = {
   init: async () => {
-    window.getData.getList().then(data => {
-      let parseString = require('xml2js').parseString;
-      parseString(data.data, function (err, result) {
-        list.value = result;
-      });
-    })
+
+  },
+  openSearch: () => {
+    window.operate.openWindow({router: 'searchBangumi', name: '搜索番剧',width:1000,height:600});
   }
 }
 </script>

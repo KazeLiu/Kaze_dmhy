@@ -1,4 +1,4 @@
-const { contextBridge, ipcRenderer } = require('electron');
+const { contextBridge, ipcRenderer,ipcMain } = require('electron');
 const {getTagBangumi, getKey, getTeam, getList} = require("@/assets/js/http/httpApi");
 
 contextBridge.exposeInMainWorld('versions', {
@@ -12,4 +12,8 @@ contextBridge.exposeInMainWorld('getData', {
     getTeam: (data) => getTeam(data),
     getKey: (data) => getKey(data),
     getTagBangumi:(data)=>getTagBangumi(data),
+})
+
+contextBridge.exposeInMainWorld('operate', {
+    openWindow: (data) => ipcRenderer.send('newWindow',data),
 })

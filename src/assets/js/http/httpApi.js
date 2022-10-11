@@ -2,7 +2,7 @@ import config from './httpConfig' // 基础路径
 import service from './httpHelper' //封装的axios
 
 export const getList = () => service({
-    url: `${config.rssBaseUrl}/latest`,
+    url: `${config.rssBaseUrl}`,
     method: 'GET',
 })
 
