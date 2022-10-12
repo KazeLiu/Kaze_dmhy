@@ -13,6 +13,6 @@ export const convertUTCTimeToLocalTime = (UTCDateString) => {
     let day = formatFunc(date2.getDate());
     let hour = date2.getHours();
     let min = formatFunc(date2.getMinutes());
-    let dateStr = year + '-' + mon + '-' + day + '<br/>' + ' ' + hour + ':' + min;
+    let dateStr = year + '-' + mon + '-' + day + ' ' + hour + ':' + min;
     return dateStr;
 };
