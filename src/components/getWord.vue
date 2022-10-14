@@ -7,9 +7,11 @@
 
 <script setup>
 import {ElMessage} from 'element-plus'
-import {ref, defineProps} from "vue";
+import {ref, defineProps,defineEmits} from "vue";
+import {handleData} from "@/assets/js/common";
 
 let textarea = ref("");
+const emit = defineEmits(["addTag"]);
 
 const props = defineProps({
   word: {
@@ -22,6 +24,7 @@ let wordList = ref(props.word);
 let addTag = () => {
   let selecter = window.getSelection().toString();
   if (selecter != null && selecter.trim() != "") {
+    emit('addTag',selecter);
     ElMessage.success(`已添加tag: ${selecter}`)
   } else {
     ElMessage.error('没有获取到文字')

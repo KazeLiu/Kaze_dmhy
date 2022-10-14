@@ -19,6 +19,7 @@
 
 import {onMounted, ref} from "vue";
 import {useRoute, useRouter} from "vue-router";
+import {handleData} from "@/assets/js/common";
 
 let showMenu = ref(false)
 
@@ -38,10 +39,10 @@ let menuList = ref([{
 
 onMounted(() => {
   const route = useRoute()
-  if (route.fullPath == "/" || route.fullPath == "/searchBangumi" || route.fullPath == "/setting") {
-    showMenu.value = true;
-  }else{
+  if (route.params.showMenu == false) {
     showMenu.value = false;
+  } else {
+    showMenu.value = true;
   }
 })
 

@@ -27,8 +27,9 @@
     </div>
     <div class="tag-area">
       <span>已存储的关键词：</span>
-      <el-tag v-for="item in tagList" :key="item">{{ item }}</el-tag>
-      <el-button @click="func.addTag" :icon="Plus" circle/>
+      <el-tag v-for="item in tagList" closable @close="handleTag.removeTag(item)" :key="item">{{ item }}</el-tag>
+      <el-button @click="func.addTagMsg" :icon="Plus" circle/>
+      <el-button @click="handleTag.removeAllTag">清空</el-button>
     </div>
     <div class="flex flex-row">
       <el-table :data="tableData">
@@ -75,7 +76,7 @@
       <html-to-page :html="pageHtml"></html-to-page>
     </el-dialog>
     <el-dialog v-model="getWordVisible" title="快速添加关键词">
-      <get-word :word="allWord" v-if="getWordVisible"></get-word>
+      <get-word :word="allWord" v-if="getWordVisible" @addTag="handleTag.addTag"></get-word>
     </el-dialog>
 
   </div>
@@ -83,7 +84,7 @@
 
 <script setup>
 import {onMounted, ref} from "vue";
-import {convertUTCTimeToLocalTime} from '../../src/assets/js/common'
+import {convertUTCTimeToLocalTime, handleData} from '../../src/assets/js/common'
 import HtmlToPage from "@/components/htmlToPage";
 import GetWord from "@/components/getWord";
 import {Plus, Search} from '@element-plus/icons-vue'
@@ -92,17 +93,16 @@ import {categoryList} from "@/assets/js/constant"
 
 let searchKey = ref("");
 let categoryId = ref("");
-let resultData = ref({});
+let resultData = ref([]);
 let tableData = ref([]);
 let pageHtml = ref("");
 let allWord = ref("")
-let tagList = ref(['1', 'ra', 'mp4'])
+let tagList = ref([])
 
 let htmlToPageVisible = ref(false);
 let getWordVisible = ref(false);
 
 onMounted(() => {
-  console.log('onMounted')
   func.init()
 })
 
@@ -118,14 +118,13 @@ const func = {
             && result.rss.channel.item.length > 0)
           tableData.value = result.rss.channel.item;
       });
-    })
+    });
+    func.getTagList()
   },
-  toLink(url) {
-    if (url) {
-      window.open(url);
-    } else {
-      alert("有问题")
-    }
+  getTagList() {
+    handleData.getData('tagList').then(res => {
+      tagList.value = res
+    });
   },
   getHtml(data) {
     htmlToPageVisible.value = true
@@ -134,9 +133,8 @@ const func = {
   getWord(data) {
     getWordVisible.value = true
     allWord.value = data
-    console.log(data)
   },
-  addTag() {
+  addTagMsg() {
     ElMessageBox.prompt('后续直接点击标签即可输入到搜索框', '添加关键词', {
       confirmButtonText: '添加',
       cancelButtonText: '取消',
@@ -145,12 +143,29 @@ const func = {
       inputErrorMessage: '至少打个空格吧',
     })
         .then(({value}) => {
-          ElMessage.error(`已添加tag: ${value}`)
+          handleTag.addTag(value);
+          ElMessage.success(`已添加tag: ${value}`)
         })
-        .catch(() => {
+        .catch((e) => {
           ElMessage.error('啥都没有输入')
         })
-  }
+  },
+}
+
+const handleTag = {
+  addTag(value) {
+    tagList.value.push(value);
+    handleData.saveData('tagList', tagList.value, 'array')
+  },
+  removeTag(value) {
+    tagList.value = tagList.value.filter(x => x != value);
+    handleData.saveData('tagList', tagList.value, 'array')
+  },
+  removeAllTag() {
+    handleData.removeData('tagList').then(_ => {
+      func.getTagList();
+    });
+  },
 }
 </script>
 
@@ -160,6 +175,7 @@ const func = {
 
   > span {
     margin-right: 5px;
+    margin-bottom: 10px;
   }
 
   .el-tag {
@@ -179,7 +195,8 @@ const func = {
       height: 1px;
       background: var(--el-text-color-secondary);;
     }
-    .category-option-left,.category-option-right{
+
+    .category-option-left, .category-option-right {
       font-size: 18px;
     }
   }
