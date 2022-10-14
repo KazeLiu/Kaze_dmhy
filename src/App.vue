@@ -78,5 +78,6 @@ let toLink = (url) => {
   width: 100%;
   height: 100vh;
   overflow: auto;
+  padding: 0 10px;
 }
 </style>

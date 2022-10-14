@@ -1,9 +1,9 @@
 <template>
-  <div>
-    <div>
+  <div class="search-bangumi">
+    <div class="search-bangumi-top" ref="searchBangumiTop">
       <el-input
           v-model="searchKey"
-          placeholder="Please input"
+          placeholder="输入或者点击tag快速输入"
       >
         <template #prepend>
           <el-select style="width: 200px;" title="category" placeholder="你也可以不选择类别" v-model="categoryId">
@@ -21,18 +21,21 @@
           </el-select>
         </template>
         <template #append>
-          <el-button :icon="Search"/>
+          <el-button :icon="Search" @click="search"/>
         </template>
       </el-input>
-    </div>
-    <div class="tag-area">
-      <span>已存储的关键词：</span>
-      <el-tag v-for="item in tagList" closable @close="handleTag.removeTag(item)" :key="item">{{ item }}</el-tag>
-      <el-button @click="func.addTagMsg" :icon="Plus" circle/>
-      <el-button @click="handleTag.removeAllTag">清空</el-button>
+      <div class="tag-area flex flex-row">
+        <div class="tag-area-main">
+          <el-tag v-for="item in tagList" @click="func.addTagToInput(item)" closable @close="handleTag.removeTag(item)"
+                  :key="item">{{ item }}
+          </el-tag>
+        </div>
+        <el-button @click="func.addTagMsg" :icon="Plus" circle/>
+        <el-button @click="handleTag.removeAllTag">清空</el-button>
+      </div>
     </div>
     <div class="flex flex-row">
-      <el-table :data="tableData">
+      <el-table :data="tableData" :height="hdHeight">
         <el-table-column type="selection" width="55"/>
         <el-table-column label="上传时间" header-align="center" align="center" width="160">
           <template #default="scope">
@@ -83,7 +86,7 @@
 </template>
 
 <script setup>
-import {onMounted, ref} from "vue";
+import {onMounted, ref, nextTick} from "vue";
 import {convertUTCTimeToLocalTime, handleData} from '../../src/assets/js/common'
 import HtmlToPage from "@/components/htmlToPage";
 import GetWord from "@/components/getWord";
@@ -98,6 +101,8 @@ let tableData = ref([]);
 let pageHtml = ref("");
 let allWord = ref("")
 let tagList = ref([])
+let searchBangumiTop = ref(null);
+let hdHeight = ref(0);
 
 let htmlToPageVisible = ref(false);
 let getWordVisible = ref(false);
@@ -124,6 +129,8 @@ const func = {
   getTagList() {
     handleData.getData('tagList').then(res => {
       tagList.value = res
+      // 计算表格高度
+      func.changeTableHeight();
     });
   },
   getHtml(data) {
@@ -133,6 +140,10 @@ const func = {
   getWord(data) {
     getWordVisible.value = true
     allWord.value = data
+  },
+  async changeTableHeight() {
+    await nextTick();
+    hdHeight.value = window.innerHeight - searchBangumiTop.value.clientHeight - 20;
   },
   addTagMsg() {
     ElMessageBox.prompt('后续直接点击标签即可输入到搜索框', '添加关键词', {
@@ -149,6 +160,12 @@ const func = {
         .catch((e) => {
           ElMessage.error('啥都没有输入')
         })
+  },
+  addTagToInput(word) {
+    searchKey.value += `${word} `
+  },
+  search(){
+
   },
 }
 
@@ -170,45 +187,54 @@ const handleTag = {
 </script>
 
 <style lang="scss">
-.tag-area {
-  margin: 10px 0;
+.search-bangumi {
+  padding-top: 10px;
 
-  > span {
-    margin-right: 5px;
-    margin-bottom: 10px;
-  }
+  .search-bangumi-top {
 
-  .el-tag {
-    margin-right: 10px;
-    cursor: pointer;
-  }
-}
+    .tag-area {
+      margin: 10px 0;
 
-.category-select {
-  &.is-big {
-    position: relative;
+      .tag-area-main {
+        max-height: 290px;
+        overflow: auto;
 
-    &::before {
-      content: '';
-      position: absolute;
-      width: 100%;
-      height: 1px;
-      background: var(--el-text-color-secondary);;
+        .el-tag {
+          margin-right: 10px;
+          cursor: pointer;
+          margin-bottom: 10px;
+        }
+      }
     }
 
-    .category-option-left, .category-option-right {
-      font-size: 18px;
+    .category-select {
+      &.is-big {
+        position: relative;
+
+        &::before {
+          content: '';
+          position: absolute;
+          width: 100%;
+          height: 1px;
+          background: var(--el-text-color-secondary);;
+        }
+
+        .category-option-left, .category-option-right {
+          font-size: 18px;
+        }
+      }
+
+      .category-option-left {
+        float: left;
+      }
+
+      .category-option-right {
+        float: right;
+        color: var(--el-text-color-secondary);
+        font-size: 13px;
+      }
     }
-  }
 
-  .category-option-left {
-    float: left;
-  }
-
-  .category-option-right {
-    float: right;
-    color: var(--el-text-color-secondary);
-    font-size: 13px;
   }
 }
 
