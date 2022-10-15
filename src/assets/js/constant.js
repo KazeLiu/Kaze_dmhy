@@ -1,4 +1,4 @@
-export let categoryList = [
+export let categoryNyaaList = [
     {
         id: '0_0',
         label: 'All categories',

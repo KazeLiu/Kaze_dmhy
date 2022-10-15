@@ -2,49 +2,60 @@
   <div class="search-bangumi">
     <div class="search-bangumi-top" ref="searchBangumiTop">
       <el-input
-          v-model="searchKey"
-          placeholder="输入或者点击tag快速输入"
+          v-model="form.keyword"
+          placeholder="输入或者点击标签快速输入"
       >
         <template #prepend>
-          <el-select style="width: 200px;" title="category" placeholder="你也可以不选择类别" v-model="categoryId">
-            <el-option
-                v-for="item in categoryList"
-                :key="item.id"
-                :label="item.label"
-                :value="item.id"
-            >
-              <div class="category-select" :class="item.isTop?'is-big':''">
-                <span class="category-option-left">{{ item.directions }}</span>
-                <span class="category-option-right">{{ item.chinese }}</span>
-              </div>
-            </el-option>
-          </el-select>
+          <div class="search-bangumi-top-select">
+            <el-select style="width: 140px;" title="category" placeholder="全部分类" v-model="form.sort_id">
+              <el-option
+                  v-for="item in selectTypeList"
+                  :key="item.id"
+                  :label="item.label"
+                  :value="item.id"
+              >
+              </el-option>
+            </el-select>
+            <el-select style="width: 140px;" title="category" placeholder="全部字幕组" v-model="form.team_id">
+              <el-option
+                  v-for="item in selectTeamList"
+                  :key="item.id"
+                  :label="item.label"
+                  :value="item.id"
+              >
+              </el-option>
+            </el-select>
+          </div>
         </template>
         <template #append>
-          <el-button :icon="Search" @click="search"/>
+          <el-button :icon="Search" @click="func.getResultList"/>
         </template>
       </el-input>
-      <div class="tag-area flex flex-row">
+      <div class="tag-area flex flex-row flex-align-center">
         <div class="tag-area-main">
           <el-tag v-for="item in tagList" @click="func.addTagToInput(item)" closable @close="handleTag.removeTag(item)"
                   :key="item">{{ item }}
           </el-tag>
         </div>
         <el-button @click="func.addTagMsg" :icon="Plus" circle/>
-        <el-button @click="handleTag.removeAllTag">清空</el-button>
+        <!-- <el-button @click="handleTag.removeAllTag">清空</el-button>-->
       </div>
     </div>
     <div class="flex flex-row">
-      <el-table :data="tableData" :height="hdHeight">
+      <el-table :data="tableData" v-loading="loadData" :height="hdHeight">
         <el-table-column type="selection" width="55"/>
+        <el-table-column label="名称" prop="title" header-align="center"/>
+        <el-table-column label="类别" prop="category._" align="center" header-align="center" width="120">
+          <template #default="scope">
+            <div>{{ scope.row.category["_"] }}</div>
+          </template>
+        </el-table-column>
         <el-table-column label="上传时间" header-align="center" align="center" width="160">
           <template #default="scope">
             <div v-html="convertUTCTimeToLocalTime(scope.row.pubDate)"></div>
           </template>
         </el-table-column>
-        <el-table-column label="类别" prop="nyaa:categoryId" header-align="center" width="60"/>
-        <el-table-column label="名称" prop="title" header-align="center"/>
-        <el-table-column label="大小" prop="nyaa:size" header-align="center" align="center" width="100"/>
+        <el-table-column label="上传者" prop="author" align="center" header-align="center" width="160"/>
         <el-table-column label="链接" header-align="center" align="center" width="60">
           <template #default="scope">
             <el-button size="small" @click="func.toLink(scope.row.link[0])">
@@ -63,7 +74,7 @@
             </el-button>
           </template>
         </el-table-column>
-        <el-table-column label="提取" header-align="center" align="center" width="100">
+        <el-table-column label="提取" header-align="center" align="center" width="60">
           <!--跳转到添加-->
           <template #default="scope">
             <el-button size="small" @click="func.getWord(scope.row.title)">
@@ -79,7 +90,13 @@
       <html-to-page :html="pageHtml"></html-to-page>
     </el-dialog>
     <el-dialog v-model="getWordVisible" title="快速添加关键词">
-      <get-word :word="allWord" v-if="getWordVisible" @addTag="handleTag.addTag"></get-word>
+      <get-word :word="allWord"
+                v-if="getWordVisible"
+                @addTag="handleTag.addTag"
+                @search="func.getResultListInWord"
+                @close="getWordVisible = false">
+
+      </get-word>
     </el-dialog>
 
   </div>
@@ -92,10 +109,14 @@ import HtmlToPage from "@/components/htmlToPage";
 import GetWord from "@/components/getWord";
 import {Plus, Search} from '@element-plus/icons-vue'
 import {ElMessage, ElMessageBox} from "element-plus";
-import {categoryList} from "@/assets/js/constant"
+import {categoryNyaaList} from "@/assets/js/constant"
+import {getShareAdvancedSearch, getShareRss} from "@/assets/js/http/httpApi";
 
-let searchKey = ref("");
-let categoryId = ref("");
+let form = ref({
+  sort_id: null,// 分类ID
+  team_id: null,//字幕组ID
+  keyword: ""
+})
 let resultData = ref([]);
 let tableData = ref([]);
 let pageHtml = ref("");
@@ -103,6 +124,9 @@ let allWord = ref("")
 let tagList = ref([])
 let searchBangumiTop = ref(null);
 let hdHeight = ref(0);
+let selectTypeList = ref([]);
+let selectTeamList = ref([]);
+let loadData = ref(true);
 
 let htmlToPageVisible = ref(false);
 let getWordVisible = ref(false);
@@ -113,38 +137,95 @@ onMounted(() => {
 
 const func = {
   init: async () => {
-    window.getData.getList().then(data => {
+    await func.getTagList()
+    await func.getShareAdvancedSearch()
+    await func.getResultList();
+  },
+  getResultListInWord(word){
+    func.resetForm();
+    form.value.keyword = word;
+    func.getResultList();
+  },
+  // 获取搜索结果
+  getResultList() {
+    let obj = JSON.parse(JSON.stringify(form.value))
+    loadData.value = true
+    window.getHttp.getShareRss(obj).then(data => {
       let parseString = require('xml2js').parseString;
       parseString(data.data, {explicitArray: false}, function (err, result) {
         resultData.value = result.rss.channel;
+
         if (result
             && result.rss.channel
             && result.rss.channel.item
             && result.rss.channel.item.length > 0)
           tableData.value = result.rss.channel.item;
+        console.log(result.rss.channel.item[0])
+        loadData.value = false
       });
     });
-    func.getTagList()
   },
+  // 获取高级分类
+  async getShareAdvancedSearch() {
+    let typeList = await handleData.getData('typeList');
+    let teamList = await handleData.getData('teamList');
+    if (!typeList || !teamList) {
+      window.getHttp.getShareAdvancedSearch().then(data => {
+        let div = document.createElement("div");
+        div.innerHTML = data.data;
+        let typeListTemp = [];
+        for (let i = 0; i < div.querySelector("#AdvSearchSort").children.length; i++) {
+          let child = div.querySelector("#AdvSearchSort").children[i];
+          typeListTemp.push({
+            label: child.text,
+            id: child.value
+          })
+        }
+        handleData.saveData('typeList', typeListTemp, 'array')
+        selectTypeList.value = typeListTemp;
+        let teamListTemp = [];
+        for (let i = 0; i < div.querySelector("#AdvSearchTeam").children.length; i++) {
+          let child = div.querySelector("#AdvSearchTeam").children[i];
+          teamListTemp.push({
+            label: child.text,
+            id: child.value
+          })
+        }
+        handleData.saveData('teamList', teamListTemp, 'array')
+        selectTeamList.value = teamListTemp;
+        ElMessage.success(`已同步更新动漫花园高级搜索选项`)
+      })
+    } else {
+      selectTypeList.value = typeList;
+      selectTeamList.value = teamList;
+    }
+  },
+  // 获取tag标签
   getTagList() {
     handleData.getData('tagList').then(res => {
-      tagList.value = res
+      if (res) {
+        tagList.value = res
+      }
       // 计算表格高度
       func.changeTableHeight();
     });
   },
+  // 渲染HTML页面
   getHtml(data) {
     htmlToPageVisible.value = true
     pageHtml.value = data
   },
+  // 提取关键字页面
   getWord(data) {
     getWordVisible.value = true
     allWord.value = data
   },
+  // 动态计算表格高度
   async changeTableHeight() {
     await nextTick();
     hdHeight.value = window.innerHeight - searchBangumiTop.value.clientHeight - 20;
   },
+  // 添加标签弹窗
   addTagMsg() {
     ElMessageBox.prompt('后续直接点击标签即可输入到搜索框', '添加关键词', {
       confirmButtonText: '添加',
@@ -158,15 +239,21 @@ const func = {
           ElMessage.success(`已添加tag: ${value}`)
         })
         .catch((e) => {
-          ElMessage.error('啥都没有输入')
+          // ElMessage.error('啥都没有输入')
         })
   },
-  addTagToInput(word) {
-    searchKey.value += `${word} `
-  },
-  search(){
 
+  // 添加标签到搜索输入框
+  addTagToInput(word) {
+    form.value.keyword += `${word} `
   },
+  resetForm() {
+    form.value = {
+      sort_id: null,// 分类ID
+      team_id: null,//字幕组ID
+      keyword: ""
+    };
+  }
 }
 
 const handleTag = {
@@ -192,6 +279,16 @@ const handleTag = {
 
   .search-bangumi-top {
 
+    .search-bangumi-top-select {
+      margin-left: -20px;
+      margin-right: -20px;
+      margin-top: -1px;
+
+      .el-select {
+        margin: 0;
+      }
+    }
+
     .tag-area {
       margin: 10px 0;
 
@@ -202,36 +299,7 @@ const handleTag = {
         .el-tag {
           margin-right: 10px;
           cursor: pointer;
-          margin-bottom: 10px;
         }
-      }
-    }
-
-    .category-select {
-      &.is-big {
-        position: relative;
-
-        &::before {
-          content: '';
-          position: absolute;
-          width: 100%;
-          height: 1px;
-          background: var(--el-text-color-secondary);;
-        }
-
-        .category-option-left, .category-option-right {
-          font-size: 18px;
-        }
-      }
-
-      .category-option-left {
-        float: left;
-      }
-
-      .category-option-right {
-        float: right;
-        color: var(--el-text-color-secondary);
-        font-size: 13px;
       }
     }
 

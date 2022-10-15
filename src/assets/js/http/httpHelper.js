@@ -44,7 +44,6 @@ const showStatus = (status) => {
 
 const service = axios.create({
     // 联调
-
     headers: {
         get: {
             'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'

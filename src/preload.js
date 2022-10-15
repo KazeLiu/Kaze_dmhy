@@ -1,5 +1,5 @@
 const {contextBridge, ipcRenderer} = require('electron');
-const {getTagBangumi, getKey, getTeam, getList} = require("@/assets/js/http/httpApi");
+const {getShareRss, getShareAdvancedSearch} = require("@/assets/js/http/httpApi");
 
 contextBridge.exposeInMainWorld('versions', {
     node: () => process.versions.node,
@@ -7,11 +7,9 @@ contextBridge.exposeInMainWorld('versions', {
     electron: () => process.versions.electron,
 })
 
-contextBridge.exposeInMainWorld('getData', {
-    getList: (data) => getList(data),
-    getTeam: (data) => getTeam(data),
-    getKey: (data) => getKey(data),
-    getTagBangumi: (data) => getTagBangumi(data),
+contextBridge.exposeInMainWorld('getHttp', {
+    getShareRss: (data) => getShareRss(data),
+    getShareAdvancedSearch: () => getShareAdvancedSearch()
 })
 
 contextBridge.exposeInMainWorld('operate', {
