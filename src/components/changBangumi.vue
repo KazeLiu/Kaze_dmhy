@@ -4,6 +4,12 @@
       <el-form-item label="关注关键词">
         <el-input v-model="form.name" :readonly="prop.formData.name">
         </el-input>
+        <div>
+          <span>快捷添加关键词：</span>
+          <el-tag v-for="item in tagList" style="cursor: pointer" @click="addTagToInput(item)"
+                  :key="item">{{ item }}
+          </el-tag>
+        </div>
       </el-form-item>
       <el-form-item label="封面URL地址">
         <div class="add-bangumi-image-select flex flex-column flex-start-center">
@@ -61,6 +67,7 @@ import SearchDoubanImage from "@/components/searchDoubanImage";
 import {ElMessage} from "element-plus";
 
 onMounted(async () => {
+  await getTagList()
   let {typeList, teamList} = await getShareAdvancedSearch()
   selectTypeList.value = typeList;
   selectTeamList.value = teamList;
@@ -71,6 +78,7 @@ onMounted(async () => {
 
 let prop = defineProps({formData: Object})
 let emit = defineEmits(["saveForm"])
+let tagList = ref([])
 let form = ref({
   name: null,
   episode: 12,
@@ -114,6 +122,18 @@ let searchImage = () => {
 let emitImageAdd = (url) => {
   form.value.cover = url;
   showSearchWord.value = false;
+}
+let getTagList = () => {
+  handleData.getData('tagList').then(res => {
+    if (res) {
+      tagList.value = res
+    }
+  });
+}
+
+// 添加标签到搜索输入框
+let addTagToInput = (word) => {
+  form.value.name += `${word} `;
 }
 </script>
 
