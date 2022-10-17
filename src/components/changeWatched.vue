@@ -16,14 +16,18 @@ let prop = defineProps({
 })
 let emit = defineEmits(["changeWatched"])
 let episodeNumber = prop.bangumiInfo.episode;
-let watchList = prop.bangumiInfo.watchList;
+let watchList = prop.bangumiInfo.watchList || [];
+
 let changeSelect = (number) => {
-  let index = watchList.findIndex(x => x == number);
-  if (index >= 0) {
-    watchList.splice(index, 1);
-  } else {
-    watchList.push(number)
+  if (watchList) {
+    let index = watchList.findIndex(x => x == number);
+    if (index >= 0) {
+      watchList.splice(index, 1);
+    } else {
+      watchList.push(number)
+    }
   }
+
 }
 defineExpose({
   watchList,

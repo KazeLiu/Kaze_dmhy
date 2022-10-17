@@ -29,6 +29,15 @@
           </el-button>
         </template>
       </el-table-column>
+      <el-table-column align="center" header-align="center" label="快速搜索">
+        <template #default="scope">
+          <el-button @click="func.toSearch(scope.row)">
+            <el-icon>
+              <Search/>
+            </el-icon>
+          </el-button>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" header-align="center" prop="name">
         <template #default="scope">
           <el-button link @click="func.changeLoveList(scope.row)">
@@ -49,7 +58,7 @@
     </el-dialog>
     <el-dialog title="点亮已经看完的剧集" @close="func.getWatchNumber" v-model="showWatchNumber"
                :destroy-on-close="true">
-      <change-watched ref="changeWatchedComponents"  :bangumiInfo="bangumiInfo"></change-watched>
+      <change-watched ref="changeWatchedComponents" :bangumiInfo="bangumiInfo"></change-watched>
     </el-dialog>
   </div>
 </template>
@@ -59,12 +68,15 @@ import {onMounted, ref} from "vue";
 import {getShareAdvancedSearch, handleData} from "@/assets/js/common";
 import AddBangumi from "@/components/changBangumi";
 import ChangeWatched from "@/components/changeWatched";
+import {useRouter} from "vue-router";
 
+const router = useRouter()
 let listData = ref([]);
 let showAddBangumi = ref(false);
 let selectTypeList = ref([])
 let selectTeamList = ref([])
 let bangumiInfo = ref({}) // 当前选中的剧
+
 
 let showWatchNumber = ref(false)
 
@@ -110,6 +122,17 @@ const func = {
   showChangeWatch(data) {
     bangumiInfo.value = data;
     showWatchNumber.value = true;
+  },
+  // 快速搜索
+  toSearch(data) {
+    router.push({
+      name: "searchBangumi",
+      query: {
+        keyword: data.name,
+        team_id: data.team,
+        sort_id: data.sort
+      }
+    })
   },
   async getWatchNumber() {
     let watchList = changeWatchedComponents.value.watchList;

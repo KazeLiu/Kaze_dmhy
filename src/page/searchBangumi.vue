@@ -109,7 +109,9 @@ import HtmlToPage from "@/components/htmlToPage";
 import GetWord from "@/components/getWord";
 import {Plus, Search} from '@element-plus/icons-vue'
 import {ElMessage, ElMessageBox} from "element-plus";
+import {useRoute} from "vue-router";
 
+let route = useRoute();
 let form = ref({
   sort_id: null,// 分类ID
   team_id: null,//字幕组ID
@@ -130,6 +132,9 @@ let htmlToPageVisible = ref(false);
 let getWordVisible = ref(false);
 
 onMounted(() => {
+  if(route.query){
+    form.value = route.query;
+  }
   func.init()
 })
 
