@@ -1,3 +1,5 @@
+import {ElMessage} from "element-plus";
+
 export const convertUTCTimeToLocalTime = (UTCDateString) => {
     if (!UTCDateString) {
         return '-';
@@ -15,6 +17,40 @@ export const convertUTCTimeToLocalTime = (UTCDateString) => {
     let min = formatFunc(date2.getMinutes());
     let dateStr = year + '-' + mon + '-' + day + ' ' + hour + ':' + min;
     return dateStr;
+};
+
+// 获取高级分类
+export const getShareAdvancedSearch = async () => {
+    let typeList = await handleData.getData('typeList');
+    let teamList = await handleData.getData('teamList');
+    if (!typeList || !teamList) {
+        window.getHttp.getShareAdvancedSearch().then(data => {
+            let div = document.createElement("div");
+            div.innerHTML = data.data;
+            typeList = [];
+            for (let i = 0; i < div.querySelector("#AdvSearchSort").children.length; i++) {
+                let child = div.querySelector("#AdvSearchSort").children[i];
+                typeList.push({
+                    label: child.text,
+                    id: child.value
+                })
+            }
+            handleData.saveData('typeList', typeList, 'array')
+
+            teamList = [];
+            for (let i = 0; i < div.querySelector("#AdvSearchTeam").children.length; i++) {
+                let child = div.querySelector("#AdvSearchTeam").children[i];
+                teamList.push({
+                    label: child.text,
+                    id: child.value
+                })
+            }
+            handleData.saveData('teamList', teamList, 'array')
+            return {typeList, teamList}
+        })
+    } else {
+        return {typeList, teamList}
+    }
 };
 
 export const handleData = {

@@ -4,7 +4,7 @@
 }
 
 .color-fff {
-  color: #ffffff!important;
+  color: #ffffff !important;
 }
 
 .color-yellow {
@@ -23,11 +23,11 @@
   cursor: pointer;
 }
 
-.user-select-none{
+.user-select-none {
   user-select: none;
 }
 
-.transition-all-halfS{
+.transition-all-halfS {
   transition: all 0.5s ease;
 }
 
@@ -114,6 +114,11 @@
 .flex-start-center {
   justify-content: flex-start;
   align-items: center;
+}
+
+.flex-start-start {
+  justify-content: flex-start;
+  align-items: flex-start;
 }
 
 .flex-end-center {

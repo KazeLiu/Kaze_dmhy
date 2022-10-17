@@ -1,5 +1,6 @@
 <template>
   <div class="flex flex-row flex-between-center">
+    <meta name="referrer" content="no-referrer" />
     <div class="home-menu flex flex-column flex-center-center" v-if="showMenu">
       <div class="flex flex-column flex-center-center home-menu-once" v-for="item in menuList" :key="item.name"
            @click="toLink(item.router)">

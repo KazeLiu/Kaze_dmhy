@@ -1,5 +1,5 @@
 const {contextBridge, ipcRenderer} = require('electron');
-const {getShareRss, getShareAdvancedSearch} = require("@/assets/js/http/httpApi");
+const {getShareRss, getShareAdvancedSearch, getDoubanSearch} = require("@/assets/js/http/httpApi");
 
 contextBridge.exposeInMainWorld('versions', {
     node: () => process.versions.node,
@@ -9,7 +9,8 @@ contextBridge.exposeInMainWorld('versions', {
 
 contextBridge.exposeInMainWorld('getHttp', {
     getShareRss: (data) => getShareRss(data),
-    getShareAdvancedSearch: () => getShareAdvancedSearch()
+    getShareAdvancedSearch: () => getShareAdvancedSearch(),
+    getDoubanSearch: (key) => getDoubanSearch(key)
 })
 
 contextBridge.exposeInMainWorld('operate', {

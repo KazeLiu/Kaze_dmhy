@@ -13,6 +13,9 @@ protocol.registerSchemesAsPrivileged([{scheme: 'app', privileges: {secure: true,
 
 
 async function createWindow() {
+
+    initIpc();
+
     // 主页面窗口状态
     const homeState = new WinState({
         defaultWidth: 1100, defaultHeight: 800
@@ -33,8 +36,6 @@ async function createWindow() {
 
     // 将状态设置到主窗口
     homeState.manage(home)
-
-    initIpc();
 }
 
 // 关闭所有窗口后退出

@@ -30,19 +30,19 @@ let initIpc = () => {
     })
 
     ipcMain.handle('saveData', function (e, args) {
-        console.log('存值', args)
+        // console.log('存值', args)
         store.set(args.key, args.value);
     })
 
     ipcMain.handle('getData', function (e, args) {
         let data = store.get(args)
-        console.log('取值', args, data)
+        // console.log('取值', args, data)
         return data
     })
 
     ipcMain.handle('removeData', function (e, args) {
         let data = store.delete(args)
-        console.log('删除', args, data)
+        // console.log('删除', args, data)
         return data
     })
 }

@@ -104,13 +104,11 @@
 
 <script setup>
 import {onMounted, ref, nextTick} from "vue";
-import {convertUTCTimeToLocalTime, handleData} from '../../src/assets/js/common'
+import {convertUTCTimeToLocalTime, getShareAdvancedSearch, handleData} from '../../src/assets/js/common'
 import HtmlToPage from "@/components/htmlToPage";
 import GetWord from "@/components/getWord";
 import {Plus, Search} from '@element-plus/icons-vue'
 import {ElMessage, ElMessageBox} from "element-plus";
-import {categoryNyaaList} from "@/assets/js/constant"
-import {getShareAdvancedSearch, getShareRss} from "@/assets/js/http/httpApi";
 
 let form = ref({
   sort_id: null,// 分类ID
@@ -141,7 +139,7 @@ const func = {
     await func.getShareAdvancedSearch()
     await func.getResultList();
   },
-  getResultListInWord(word){
+  getResultListInWord(word) {
     func.resetForm();
     form.value.keyword = word;
     func.getResultList();
@@ -160,45 +158,15 @@ const func = {
             && result.rss.channel.item
             && result.rss.channel.item.length > 0)
           tableData.value = result.rss.channel.item;
-        console.log(result.rss.channel.item[0])
         loadData.value = false
       });
     });
   },
   // 获取高级分类
   async getShareAdvancedSearch() {
-    let typeList = await handleData.getData('typeList');
-    let teamList = await handleData.getData('teamList');
-    if (!typeList || !teamList) {
-      window.getHttp.getShareAdvancedSearch().then(data => {
-        let div = document.createElement("div");
-        div.innerHTML = data.data;
-        let typeListTemp = [];
-        for (let i = 0; i < div.querySelector("#AdvSearchSort").children.length; i++) {
-          let child = div.querySelector("#AdvSearchSort").children[i];
-          typeListTemp.push({
-            label: child.text,
-            id: child.value
-          })
-        }
-        handleData.saveData('typeList', typeListTemp, 'array')
-        selectTypeList.value = typeListTemp;
-        let teamListTemp = [];
-        for (let i = 0; i < div.querySelector("#AdvSearchTeam").children.length; i++) {
-          let child = div.querySelector("#AdvSearchTeam").children[i];
-          teamListTemp.push({
-            label: child.text,
-            id: child.value
-          })
-        }
-        handleData.saveData('teamList', teamListTemp, 'array')
-        selectTeamList.value = teamListTemp;
-        ElMessage.success(`已同步更新动漫花园高级搜索选项`)
-      })
-    } else {
-      selectTypeList.value = typeList;
-      selectTeamList.value = teamList;
-    }
+    let {typeList, teamList} = await getShareAdvancedSearch();
+    selectTypeList.value = typeList;
+    selectTeamList.value = teamList;
   },
   // 获取tag标签
   getTagList() {

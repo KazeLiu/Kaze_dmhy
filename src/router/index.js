@@ -14,7 +14,7 @@ const constRouter = [
     {
         path: '/addBangumi',
         name: 'addBangumi',
-        component: () => import('@/page/addBangumi')
+        component: () => import('@/components/changBangumi')
     },
 ];
 
