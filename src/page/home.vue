@@ -5,31 +5,31 @@
       <el-button @click="func.openChangeLoveList(true)">添加关注</el-button>
     </div>
     <el-table :data="listData">
-      <el-table-column label="封面" align="center" header-align="center">
+      <el-table-column label="封面" width="120" align="center" header-align="center">
         <template #default="scope">
           <el-image fit="contain" style="height: 100px" :src="scope.row.cover"/>
         </template>
       </el-table-column>
-      <el-table-column align="center" header-align="center" label="名称/关键字" prop="name"></el-table-column>
-      <el-table-column align="center" header-align="center" label="集数" prop="episode"></el-table-column>
-      <el-table-column align="center" header-align="center" label="字幕组">
+      <el-table-column align="center"  header-align="center" label="名称/关键字" prop="name"></el-table-column>
+      <el-table-column align="center" width="60" header-align="center" label="集数" prop="episode"></el-table-column>
+      <el-table-column align="center" width="130" header-align="center" label="字幕组">
         <template #default="scope">
           {{ func.findTeam(scope.row.team) }}
         </template>
       </el-table-column>
-      <el-table-column align="center" header-align="center" label="类别">
+      <el-table-column align="center"  width="100" header-align="center" label="类别">
         <template #default="scope">
           {{ func.findType(scope.row.sort) }}
         </template>
       </el-table-column>
-      <el-table-column label="已观看集数" align="center" header-align="center">
+      <el-table-column label="已观看集数" width="120" align="center" header-align="center">
         <template #default="scope">
           <el-button link @click="func.showChangeWatch(scope.row)">
             已观看{{ scope.row.watchList ? scope.row.watchList.length : 0 }}集
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column align="center" header-align="center" label="快速搜索">
+      <el-table-column align="center" width="60" header-align="center" label="搜索">
         <template #default="scope">
           <el-button @click="func.toSearch(scope.row)">
             <el-icon>
@@ -38,7 +38,7 @@
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" header-align="center" prop="name">
+      <el-table-column label="操作" width="120" align="center" header-align="center" prop="name">
         <template #default="scope">
           <el-button link @click="func.changeLoveList(scope.row)">
             <el-icon>
