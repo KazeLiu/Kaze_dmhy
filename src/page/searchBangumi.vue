@@ -104,7 +104,7 @@
 
 <script setup>
 import {onMounted, ref, nextTick} from "vue";
-import {convertUTCTimeToLocalTime, getShareAdvancedSearch, handleData} from '../../src/assets/js/common'
+import {convertUTCTimeToLocalTime, getShareRSSList, getShareAdvancedSearch, handleData} from '../../src/assets/js/common'
 import HtmlToPage from "@/components/htmlToPage";
 import GetWord from "@/components/getWord";
 import {Plus, Search} from '@element-plus/icons-vue'
@@ -151,21 +151,12 @@ const func = {
   },
   // 获取搜索结果
   getResultList() {
-    let obj = JSON.parse(JSON.stringify(form.value))
     loadData.value = true
-    window.getHttp.getShareRss(obj).then(data => {
-      let parseString = require('xml2js').parseString;
-      parseString(data.data, {explicitArray: false}, function (err, result) {
-        resultData.value = result.rss.channel;
-
-        if (result
-            && result.rss.channel
-            && result.rss.channel.item
-            && result.rss.channel.item.length > 0)
-          tableData.value = result.rss.channel.item;
-        loadData.value = false
-      });
-    });
+    getShareRSSList(form.value).then(({channel, resultData})=>{
+      resultData.value = channel;
+      tableData.value = resultData;
+      loadData.value = false
+    })
   },
   // 获取高级分类
   async getShareAdvancedSearch() {

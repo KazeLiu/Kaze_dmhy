@@ -82,11 +82,15 @@ let tagList = ref([])
 let form = ref({
   name: null,
   episode: 12,
-  watched: null,// 已经看了多少集
+  watchList: [],// 已经看了多少集
   team: null,
   cover: null,
   sort: null,
-  index: 0
+  index: 0,
+  allCount: 0,// 查询到的全部列表
+  newId: "",// 使用链接作为唯一ID判断最新的一条与在线列表对比
+  newInfo: null, // 最新一条的内容
+  newCount: 0 // 对比的条数
 });
 let selectTypeList = ref([]);
 let selectTeamList = ref([]);

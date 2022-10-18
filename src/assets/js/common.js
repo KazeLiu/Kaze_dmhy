@@ -1,4 +1,5 @@
 import {ElMessage} from "element-plus";
+import {parseString} from "xml2js";
 
 export const convertUTCTimeToLocalTime = (UTCDateString) => {
     if (!UTCDateString) {
@@ -52,6 +53,39 @@ export const getShareAdvancedSearch = async () => {
         return {typeList, teamList}
     }
 };
+
+export const getShareRSSList = (form) => {
+    return new Promise((resolve, reject) => {
+        let obj = JSON.parse(JSON.stringify(form))
+        window.getHttp.getShareRss(obj).then(data => {
+            let parseString = require('xml2js').parseString;
+            let channel = {};
+            parseString(data.data, {explicitArray: false}, (err, result) => {
+                if (err) {
+                    resolve({channel, resultData: []})
+                }
+                channel = result.rss.channel;
+                if (result
+                    && result.rss.channel
+                    && result.rss.channel.item
+                    && result.rss.channel.item.length > 0) {
+                    resolve({channel, resultData: result.rss.channel.item})
+                } else {
+                    resolve({channel, resultData: []})
+                }
+            });
+        });
+    })
+
+}
+
+export const getMoreShareRSSList = (formList) => {
+    let promiseList = [], successCount = [], failCount = [];
+    formList.forEach(item => {
+        promiseList.push(getShareRSSList(item));
+    })
+    return Promise.all(promiseList)
+}
 
 export const handleData = {
     async saveData(key, data) {
