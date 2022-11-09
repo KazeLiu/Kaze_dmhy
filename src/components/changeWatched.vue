@@ -16,7 +16,7 @@ let prop = defineProps({
 })
 let emit = defineEmits(["changeWatched"])
 let episodeNumber = prop.bangumiInfo.episode;
-let watchList = prop.bangumiInfo.watchList || [];
+let watchList = prop.bangumiInfo.watchList || ref([]);
 
 let changeSelect = (number) => {
   if (watchList) {

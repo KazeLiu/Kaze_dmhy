@@ -114,11 +114,7 @@ const func = {
     if (clear) {
       bangumiInfo.value = {};
     }
-    if (clear) {
-      isEditBangumi.value = true
-    } else {
-      isEditBangumi.value = false
-    }
+    isEditBangumi.value = !clear;
     showAddBangumi.value = true
   },
   // 调整关注番剧
@@ -141,7 +137,6 @@ const func = {
   // 获取列表
   getTable: async () => {
     let temp = await handleData.getData('loveList');
-    console.log(temp)
     if (temp && temp.length > 0) {
       listData.value = temp
     }
