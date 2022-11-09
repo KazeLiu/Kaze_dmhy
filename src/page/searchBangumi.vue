@@ -32,6 +32,7 @@
         </template>
       </el-input>
       <div class="tag-area flex flex-row flex-align-center">
+        <el-button @click="func.addBangumi">关注本次搜索结果</el-button>
         <div class="tag-area-main">
           <el-tag v-for="item in tagList" @click="func.addTagToInput(item)" closable @close="handleTag.removeTag(item)"
                   :key="item">{{ item }}
@@ -98,14 +99,22 @@
 
       </get-word>
     </el-dialog>
-
+    <el-dialog title="添加关注" v-model="showAddBangumi" :destroy-on-close="true">
+      <add-bangumi :formData="bangumiInfo" @saveForm="func.saveForm"></add-bangumi>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
 import {onMounted, ref, nextTick} from "vue";
-import {convertUTCTimeToLocalTime, getShareRSSList, getShareAdvancedSearch, handleData} from '../../src/assets/js/common'
+import {
+  convertUTCTimeToLocalTime,
+  getShareRSSList,
+  getShareAdvancedSearch,
+  handleData
+} from '../../src/assets/js/common'
 import HtmlToPage from "@/components/htmlToPage";
+import AddBangumi from "@/components/changBangumi";
 import GetWord from "@/components/getWord";
 import {Plus, Search} from '@element-plus/icons-vue'
 import {ElMessage, ElMessageBox} from "element-plus";
@@ -117,6 +126,8 @@ let form = ref({
   team_id: null,//字幕组ID
   keyword: ""
 })
+let showAddBangumi = ref(false)
+let bangumiInfo = ref({})
 let resultData = ref([]);
 let tableData = ref([]);
 let pageHtml = ref("");
@@ -126,13 +137,13 @@ let searchBangumiTop = ref(null);
 let hdHeight = ref(0);
 let selectTypeList = ref([]);
 let selectTeamList = ref([]);
-let loadData = ref(true);
+let loadData = ref(false);
 
 let htmlToPageVisible = ref(false);
 let getWordVisible = ref(false);
 
 onMounted(() => {
-  if(route.query){
+  if (route.query) {
     form.value = route.query;
   }
   func.init()
@@ -152,7 +163,7 @@ const func = {
   // 获取搜索结果
   getResultList() {
     loadData.value = true
-    getShareRSSList(form.value).then(({channel, resultData})=>{
+    getShareRSSList(form.value).then(({channel, resultData}) => {
       resultData.value = channel;
       tableData.value = resultData;
       loadData.value = false
@@ -209,7 +220,7 @@ const func = {
 
   // 添加标签到搜索输入框
   addTagToInput(word) {
-    form.value.keyword += `${word} `
+    form.value.keyword += ` ${word} `
   },
   resetForm() {
     form.value = {
@@ -217,6 +228,22 @@ const func = {
       team_id: null,//字幕组ID
       keyword: ""
     };
+  },
+  // 将搜索关键词放入关注列表
+  addBangumi() {
+    if (form.value.keyword.trim().length <= 0) {
+      return;
+    }
+    let formData = {};
+    formData.sort = form.value.sort_id;
+    formData.team = form.value.team_id;
+    formData.name = form.value.keyword.split(' ')[0];
+    if (form.value.keyword.split(formData.name).length >= 1) {
+      formData.word = form.value.keyword.split(formData.name)[1];
+    }
+
+    bangumiInfo.value = formData;
+    showAddBangumi.value = true;
   }
 }
 
@@ -257,6 +284,7 @@ const handleTag = {
       margin: 10px 0;
 
       .tag-area-main {
+        margin-left: 20px;
         max-height: 290px;
         overflow: auto;
 

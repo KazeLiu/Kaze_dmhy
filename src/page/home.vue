@@ -147,10 +147,11 @@ const func = {
   },
   // 快速搜索
   toSearch(data) {
+    debugger
     router.push({
       name: "searchBangumi",
       query: {
-        keyword: data.name,
+        keyword: data.name + ' ' + data.word,
         team_id: data.team,
         sort_id: data.sort
       }
@@ -198,7 +199,7 @@ const func = {
     listData.value.forEach(data => {
       data.hasNew = false;
       getShareRSSList({
-        keyword: data.name,
+        keyword: data.name + ' ' + data.word,
         team_id: data.team,
         sort_id: data.sort
       }).then(({channel, resultData}) => {

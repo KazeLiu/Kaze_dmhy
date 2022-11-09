@@ -1,4 +1,9 @@
 <template>
+  <el-input v-model="imageKey">
+    <template #append>
+      <el-button @click="searchImage">搜索图片</el-button>
+    </template>
+  </el-input>
   <div class="search-douban-image-area flex flex-start-start" v-if="imageInfoList.length>0">
     <span :key="item.cover"
           v-for="item in imageInfoList"
@@ -22,16 +27,19 @@ import {computed, defineProps, onMounted, ref, defineEmits} from "vue"
 
 const props = defineProps({word: String})
 
-let imageKey = computed(() => props.word.trim());
+let imageKey = ref("");
 let imageInfoList = ref([]);
 let emit = defineEmits(["emitImageAdd"]);
+let infoText = ref("");
 
 
 onMounted(() => {
+  imageKey.value = props.word.trim();
   searchImage();
 });
 
 let searchImage = () => {
+  infoText.value = "正在从豆瓣抓取数据……";
   window.getHttp.getDoubanSearch(imageKey.value).then(data => {
     imageInfoList.value = [];
     let div = document.createElement("div");
@@ -47,6 +55,11 @@ let searchImage = () => {
           })
         }
       })
+      if(imageInfoList.value.length>0){
+        infoText.value = "展示中……";
+      }else{
+        infoText.value = "没有搜索到图片，请更换关键词";
+      }
     }
   })
 }

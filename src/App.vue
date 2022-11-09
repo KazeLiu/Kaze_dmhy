@@ -20,7 +20,6 @@
 
 import {onMounted, ref} from "vue";
 import {useRoute, useRouter} from "vue-router";
-import {handleData} from "@/assets/js/common";
 
 let showMenu = ref(false)
 
@@ -32,10 +31,6 @@ let menuList = ref([{
   name: '搜索',
   icon: 'Monitor',
   router: '/searchBangumi'
-}, {
-  name: '设置',
-  icon: 'Setting',
-  router: ''
 }]);
 
 onMounted(() => {

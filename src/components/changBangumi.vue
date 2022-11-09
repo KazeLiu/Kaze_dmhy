@@ -1,12 +1,15 @@
 <template>
   <div>
     <el-form :model="form" label-width="120px">
-      <el-form-item label="关注关键词">
-        <el-input v-model="form.name" :readonly="prop.formData.name">
+      <el-form-item label="关注番剧名" placeholder="番剧名称信息，图片搜索将默认带上">
+        <el-input v-model="form.name">
+        </el-input>
+      </el-form-item>
+      <el-form-item label="辅助搜索词"  placeholder="辅助关键词，比如1080p，简日等">
+        <el-input v-model="form.word">
         </el-input>
         <div>
-          <span>快捷添加关键词：</span>
-          <el-tag v-for="item in tagList" style="cursor: pointer" @click="addTagToInput(item)"
+          <el-tag v-for="item in tagList" style="cursor: pointer;margin-right: 5px" @click="addTagToInput(item)"
                   :key="item">{{ item }}
           </el-tag>
         </div>
@@ -98,6 +101,9 @@ let showSearchWord = ref(false);
 
 let onSubmit = async () => {
   let data = await handleData.getData('loveList');
+  if(!form.value.episode){
+    form.value.episode = 12
+  }
   if (data) {
     // 查询是否有同名
     if (data.findIndex(x => x.name == form.value.name) >= 0 && !prop.formData.name) {
@@ -137,7 +143,7 @@ let getTagList = () => {
 
 // 添加标签到搜索输入框
 let addTagToInput = (word) => {
-  form.value.name += `${word} `;
+  form.value.name += ` ${word} `;
 }
 </script>
 

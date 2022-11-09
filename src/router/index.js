@@ -10,7 +10,7 @@ const constRouter = [
         path: '/searchBangumi',
         name: 'searchBangumi',
         component: () => import('@/page/searchBangumi'),
-        
+
     },
     {
         path: '/addBangumi',
