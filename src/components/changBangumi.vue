@@ -16,9 +16,9 @@
       </el-form-item>
       <el-form-item label="封面URL地址">
         <div class="add-bangumi-image-select flex flex-column flex-start-center">
-          <el-input v-model="form.cover" placeholder="输入URL地址">
+          <el-input v-model="form.cover" placeholder="URL地址">
             <template #append>
-              <el-button @click="searchImage">根据关键词查找图片</el-button>
+              <el-button @click="searchImage">查找图片</el-button>
             </template>
           </el-input>
           <el-image fit="contain" v-show="form.cover" :src="form.cover">

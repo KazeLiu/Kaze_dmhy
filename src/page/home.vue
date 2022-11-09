@@ -2,13 +2,23 @@
   <div class="home">
     <div class="flex flex-between-center">
       <span>已关注剧集</span>
-      <el-button @click="func.openChangeLoveList(true)">添加关注</el-button>
-      <el-button @click="func.checkUpData()">检查更新</el-button>
+      <div>
+        <el-button @click="func.exportData">导出关注</el-button>
+        <el-button @click="func.importData">导入关注</el-button>
+        <el-button @click="func.openChangeLoveList(true)">添加关注</el-button>
+        <el-button @click="func.checkUpData()">检查番剧更新</el-button>
+      </div>
     </div>
     <el-table :data="listData">
       <el-table-column label="封面" width="120" align="center" header-align="center">
         <template #default="scope">
           <el-image fit="contain" style="height: 100px" :src="scope.row.cover"/>
+        </template>
+      </el-table-column>
+      <el-table-column label="更新" width="140" align="center" header-align="center" prop="newCount">
+        <template #default="scope">
+          <span v-if="scope.row.newCount == 0">没有更新</span>
+          <span v-else>更新{{ scope.row.newCount }}集</span>
         </template>
       </el-table-column>
       <el-table-column align="center" header-align="center" label="名称/关键字" prop="name"></el-table-column>
@@ -28,15 +38,12 @@
           <el-popover
               v-if="scope.row.newInfo"
               placement="top-start"
-              title="最新一条标题"
               :width="200"
               trigger="hover"
           >
             {{ scope.row.newInfo.title }}
-            <br/>
-            <el-button>下载</el-button>
             <template #reference>
-              <el-button>查看</el-button>
+              <el-button @click="func.copyUrl(scope.row.newInfo.enclosure.$.url)">复制地址</el-button>
             </template>
           </el-popover>
           <div v-else>
@@ -51,7 +58,7 @@
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column align="center" width="60" header-align="center" label="搜索">
+      <el-table-column align="center" width="60" header-align="center" label="查看全部">
         <template #default="scope">
           <el-button @click="func.toSearch(scope.row)">
             <el-icon>
@@ -91,6 +98,7 @@ import {getMoreShareRSSList, getShareAdvancedSearch, getShareRSSList, handleData
 import AddBangumi from "@/components/changBangumi";
 import ChangeWatched from "@/components/changeWatched";
 import {useRouter} from "vue-router";
+import {ElMessage, ElMessageBox} from "element-plus";
 
 const router = useRouter()
 let listData = ref([]);
@@ -109,6 +117,34 @@ onMounted(async () => {
   await func.getTable();
 })
 const func = {
+  exportData() {
+    handleData.getData('loveList').then(data => {
+      window.handleData.exportJsonFile(data);
+    })
+  },
+  async importData() {
+    let data = await window.handleData.importJsonFile();
+    let temp = await handleData.getData('loveList');
+    if (temp && temp.length > 0) {
+      ElMessageBox.confirm(
+          '检测到了本地有数据，是否覆盖?',
+          'Warning',
+          {
+            confirmButtonText: '覆盖',
+            cancelButtonText: '取消',
+            type: 'warning',
+          }
+      )
+          .then(() => {
+            handleData.saveData('loveList', JSON.parse(data));
+            listData.value = JSON.parse(data);
+          })
+          .catch(() => {
+
+          })
+
+    }
+  },
   // 打开调整番剧数据的窗口
   openChangeLoveList: (clear) => {
     if (clear) {
@@ -148,7 +184,6 @@ const func = {
   },
   // 快速搜索
   toSearch(data) {
-    debugger
     router.push({
       name: "searchBangumi",
       query: {
@@ -218,8 +253,13 @@ const func = {
         data.update = new Date() // 更新时间
         data.allCount = resultData.length // 一共查询到的结果
         handleData.saveData('loveList', listData.value);
+        console.log(JSON.stringify(listData));
       })
     });
+  },
+  copyUrl(url) {
+    window.handleData.writeText(url);
+    ElMessage.success(`已复制`)
   }
 }
 

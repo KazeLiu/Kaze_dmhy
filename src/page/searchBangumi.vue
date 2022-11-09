@@ -33,6 +33,7 @@
       </el-input>
       <div class="tag-area flex flex-row flex-align-center">
         <el-button @click="func.addBangumi">关注本次搜索结果</el-button>
+        <el-button @click="func.copyDownloadUrl">复制已勾选的下载地址</el-button>
         <div class="tag-area-main">
           <el-tag v-for="item in tagList" @click="func.addTagToInput(item)" closable @close="handleTag.removeTag(item)"
                   :key="item">{{ item }}
@@ -42,7 +43,7 @@
       </div>
     </div>
     <div class="flex flex-row">
-      <el-table :data="tableData" v-loading="loadData" :height="hdHeight">
+      <el-table :data="tableData" ref="tableDom" v-loading="loadData" :height="hdHeight">
         <el-table-column type="selection" width="55"/>
         <el-table-column label="名称" prop="title" header-align="center"/>
         <el-table-column label="类别" prop="category._" align="center" header-align="center" width="120">
@@ -128,6 +129,7 @@ let form = ref({
 let showAddBangumi = ref(false)
 let bangumiInfo = ref({})
 let resultData = ref([]);
+let tableDom = ref(null)
 let tableData = ref([]);
 let pageHtml = ref("");
 let allWord = ref("")
@@ -243,6 +245,15 @@ const func = {
 
     bangumiInfo.value = formData;
     showAddBangumi.value = true;
+  },
+  copyDownloadUrl() {
+    try {
+      let urlList = tableDom.value.getSelectionRows().map(item => item.enclosure["$"].url).join(',')
+      window.handleData.writeText(urlList);
+      ElMessage.success(`已复制`)
+    } catch (e) {
+      ElMessage.error(`复制失败`)
+    }
   }
 }
 
