@@ -6,7 +6,7 @@
         <el-button @click="func.exportData">导出关注</el-button>
         <el-button @click="func.importData">导入关注</el-button>
         <el-button @click="func.openChangeLoveList(true)">添加关注</el-button>
-        <el-button @click="func.checkUpData()">检查番剧更新</el-button>
+        <el-button @click="func.checkUpDataList">检查番剧更新</el-button>
       </div>
     </div>
     <el-table :data="listData">
@@ -17,8 +17,18 @@
       </el-table-column>
       <el-table-column label="更新" width="140" align="center" header-align="center" prop="newCount">
         <template #default="scope">
-          <span v-if="scope.row.newCount == 0">没有更新</span>
-          <span v-else>更新{{ scope.row.newCount }}集</span>
+          <el-popover
+              v-if="scope.row.newCount != 0"
+              placement="top-start"
+              :width="200"
+              trigger="hover"
+          >
+            更新时间：{{ scope.row.update }}
+            <template #reference>
+              <span>{{ scope.row.newCount }}条更新</span>
+            </template>
+          </el-popover>
+          <span v-else>没有更新</span>
         </template>
       </el-table-column>
       <el-table-column align="center" header-align="center" label="名称/关键字" prop="name"></el-table-column>
@@ -60,7 +70,7 @@
       </el-table-column>
       <el-table-column align="center" width="60" header-align="center" label="查看全部">
         <template #default="scope">
-          <el-button @click="func.toSearch(scope.row)">
+          <el-button title="检查更新" @click="func.toSearch(scope.row)">
             <el-icon>
               <Search/>
             </el-icon>
@@ -69,12 +79,17 @@
       </el-table-column>
       <el-table-column label="操作" width="120" align="center" header-align="center" prop="name">
         <template #default="scope">
-          <el-button link @click="func.changeLoveList(scope.row)">
+          <el-button link title="检查更新" @click="func.checkUpData(scope.row)">
+            <el-icon>
+              <Refresh/>
+            </el-icon>
+          </el-button>
+          <el-button link title="编辑信息" @click="func.changeLoveList(scope.row)">
             <el-icon>
               <Edit/>
             </el-icon>
           </el-button>
-          <el-button link @click="func.removeLoveList(scope.row.name)">
+          <el-button link title="删除该条" @click="func.removeLoveList(scope.row.name)">
             <el-icon>
               <Delete/>
             </el-icon>
@@ -159,11 +174,26 @@ const func = {
     func.openChangeLoveList()
   },
   // 删除关注番剧
-  removeLoveList: async (name) => {
-    let temp = await handleData.getData('loveList');
-    temp = temp.filter(x => x.name != name);
-    await handleData.saveData('loveList', temp);
-    await func.getTable()
+  removeLoveList: (name) => {
+    ElMessageBox.confirm(
+        '删除该条?',
+        'Warning',
+        {
+          confirmButtonText: '删除',
+          cancelButtonText: '取消',
+          type: 'warning',
+        }
+    )
+        .then(async () => {
+          let temp = await handleData.getData('loveList');
+          temp = temp.filter(x => x.name != name);
+          await handleData.saveData('loveList', temp);
+          await func.getTable()
+        })
+        .catch(() => {
+
+        })
+
   },
   // 保存番剧数据后回调
   saveForm: () => {
@@ -231,31 +261,41 @@ const func = {
       return "全部"
     }
   },
-  checkUpData: async () => {
-    listData.value.forEach(data => {
-      data.hasNew = false;
-      getShareRSSList({
-        keyword: data.name + ' ' + data.word,
-        team_id: data.team,
-        sort_id: data.sort
-      }).then(({channel, resultData}) => {
-        if (resultData.length > 0) {
-          data.newId = resultData[0].link // 最新一条的数据 以网址作为ID
+  checkUpData: async (data) => {
+    data.hasNew = false;
+    getShareRSSList({
+      keyword: data.name + ' ' + data.word,
+      team_id: data.team,
+      sort_id: data.sort
+    }).then(({channel, resultData}) => {
+      // 先在库里面找到这条数据 用newID查找
+      if (data.newInfo || data.newId) {
+        // 如果有值 现在查询到的内容中查询本地有的那条值在哪 如果查不到 newCount = 获取到的全部数字
+        let index = resultData.findIndex(x => x.link == data.newId)
+        if (index > 0) {
+          data.newCount = index
           data.newInfo = resultData[0];
-        }
-        // 检查如果有newId 则在结果中查找是否有包含的ID 然后计算多出来的数据
-        if (data.newId && resultData.length > 0) {
-          data.newCount = resultData.findIndex(x => x.link == data.newId);
+          data.newId = resultData[0].link
         } else {
           data.newCount = 0
+          data.newInfo = resultData[index];
+          data.newId = resultData[index].link
         }
-        data.hasNew = true;  // 表示已经更新过
-        data.update = new Date() // 更新时间
-        data.allCount = resultData.length // 一共查询到的结果
-        handleData.saveData('loveList', listData.value);
-        console.log(JSON.stringify(listData));
-      })
-    });
+      } else {
+        // 如果没有值newCount = 获取到的全部数字
+        data.newId = resultData[0].link // 最新一条的数据 以网址作为ID
+        data.newInfo = resultData[0];
+        data.newCount = resultData.length
+      }
+
+      data.hasNew = true;  // 表示已经更新过
+      data.update = new Date() // 更新时间
+      data.allCount = resultData.length // 一共查询到的结果
+      handleData.saveData('loveList', listData.value);
+    })
+  },
+  checkUpDataList: async () => {
+    listData.value.forEach(data => func.checkUpData(data));
   },
   copyUrl(url) {
     window.handleData.writeText(url);
