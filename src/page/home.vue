@@ -76,7 +76,7 @@
       </el-table-column>
     </el-table>
     <el-dialog title="添加关注的剧" v-model="showAddBangumi" :destroy-on-close="true">
-      <add-bangumi :formData="bangumiInfo" @saveForm="func.saveForm"></add-bangumi>
+      <add-bangumi :is-edit="isEditBangumi" :formData="bangumiInfo" @saveForm="func.saveForm"></add-bangumi>
     </el-dialog>
     <el-dialog title="点亮已经看完的剧集" @close="func.getWatchNumber" v-model="showWatchNumber"
                :destroy-on-close="true">
@@ -98,6 +98,7 @@ let showAddBangumi = ref(false);
 let selectTypeList = ref([])
 let selectTeamList = ref([])
 let bangumiInfo = ref({}) // 当前选中的剧
+let isEditBangumi = ref(false)
 
 let showWatchNumber = ref(false)
 
@@ -112,6 +113,11 @@ const func = {
   openChangeLoveList: (clear) => {
     if (clear) {
       bangumiInfo.value = {};
+    }
+    if (clear) {
+      isEditBangumi.value = true
+    } else {
+      isEditBangumi.value = false
     }
     showAddBangumi.value = true
   },

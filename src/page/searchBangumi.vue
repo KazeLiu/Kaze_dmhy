@@ -39,7 +39,6 @@
           </el-tag>
         </div>
         <el-button @click="func.addTagMsg" :icon="Plus" circle/>
-        <!-- <el-button @click="handleTag.removeAllTag">清空</el-button>-->
       </div>
     </div>
     <div class="flex flex-row">
@@ -100,7 +99,7 @@
       </get-word>
     </el-dialog>
     <el-dialog title="添加关注" v-model="showAddBangumi" :destroy-on-close="true">
-      <add-bangumi :formData="bangumiInfo" @saveForm="func.saveForm"></add-bangumi>
+      <add-bangumi :is-edit="false" :formData="bangumiInfo" @saveForm="func.saveForm"></add-bangumi>
     </el-dialog>
   </div>
 </template>

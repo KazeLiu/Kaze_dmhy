@@ -5,7 +5,7 @@
         <el-input v-model="form.name">
         </el-input>
       </el-form-item>
-      <el-form-item label="辅助搜索词"  placeholder="辅助关键词，比如1080p，简日等">
+      <el-form-item label="辅助搜索词" placeholder="辅助关键词，比如1080p，简日等">
         <el-input v-model="form.word">
         </el-input>
         <div>
@@ -54,7 +54,7 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="onSubmit">{{ prop.formData.name ? "修改" : "添加" }}</el-button>
+        <el-button type="primary" @click="onSubmit">{{ prop.isEdit ? "修改" : "添加" }}</el-button>
       </el-form-item>
     </el-form>
     <el-dialog :destroy-on-close="true" :append-to-body="true" v-model="showSearchWord" title="可选图片">
@@ -79,7 +79,7 @@ onMounted(async () => {
   }
 })
 
-let prop = defineProps({formData: Object})
+let prop = defineProps({formData: Object, isEdit: Boolean})
 let emit = defineEmits(["saveForm"])
 let tagList = ref([])
 let form = ref({
@@ -101,7 +101,7 @@ let showSearchWord = ref(false);
 
 let onSubmit = async () => {
   let data = await handleData.getData('loveList');
-  if(!form.value.episode){
+  if (!form.value.episode) {
     form.value.episode = 12
   }
   if (data) {
